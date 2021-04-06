@@ -14,8 +14,14 @@ def get_titles_from_search_results(filename):
 
     [('Book title 1', 'Author 1'), ('Book title 2', 'Author 2')...]
     """
-
-    pass
+    file = open(filename)
+    soup = BeautifulSoup(file,"html.parser")
+    titles = soup.find_all('a', class_='bookTitle')
+    authors = soup.find_all('a', class_='authorName')
+    tlist=[]
+    for title, author in zip(titles, authors):
+        tlist.append((title.get_text().strip("\n"),author.get_text().strip("\n")))
+    return tlist
 
 
 def get_search_links():
@@ -31,8 +37,28 @@ def get_search_links():
     “https://www.goodreads.com/book/show/kdkd".
 
     """
-
-    pass
+    booklist=[]
+    r = requests.get("https://www.goodreads.com/search?q=fantasy&qid=NwUsLiA2Nc")
+    soup = BeautifulSoup(r.content,"html.parser")
+    for link in soup.find_all('a'):
+        booklist.append(link.get("href"))
+    regex = r"\/book\/show"
+    resultlist=[]
+    for book in booklist:
+        if type(book) == str:
+            results = re.findall(regex,book)
+            if results:
+                resultlist.append(book)
+    results =[]
+    for book in resultlist:
+        if book not in results:
+            results.append(book)
+    results2=[]
+    for book in results:
+        results2.append("https://www.goodreads.com"+book)
+    results2 = results2[:10]        
+    return results2
+    
 
 
 def get_book_summary(book_url):
@@ -48,8 +74,15 @@ def get_book_summary(book_url):
     You can easily capture CSS selectors with your browser's inspector window.
     Make sure to strip() any newlines from the book title and number of pages.
     """
+    p = requests.get(book_url)
+    soup = BeautifulSoup(p.content,"html.parser")
+    titles = soup.find('h1', id='bookTitle')
+    authors = soup.find('a', class_='authorName')
+    pages = soup.find('span', itemprop = "numberOfPages")
+    p = (titles.get_text().strip().strip("\n"),authors.get_text().strip("\n"),pages.get_text().strip("\n")) 
+    return p
 
-    pass
+    
 
 
 def summarize_best_books(filepath):
