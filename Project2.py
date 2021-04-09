@@ -165,7 +165,16 @@ def extra_credit(filepath):
     You do not have to write test cases for this function.
     """
     regex = r"[A-Z]\S{2,}\s[A-Z]\S+"
-
+    f = open(filepath,encoding="utf-8") 
+    soup = BeautifulSoup(f,"html.parser")
+    c = soup.find_all("div", id ="description")
+    list = []
+    for thing in c: 
+        list.append(thing.select("span"))
+    list.sort(reverse=True)
+    theone = str(list[0])
+    results = re.findall(regex,theone)
+    return results
 
 class TestCases(unittest.TestCase):
 
